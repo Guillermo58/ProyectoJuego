@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 @import url('https://fonts.googleapis.com/css2?family=Inconsolata:wght@200..900&display=swap');
 
@@ -176,3 +177,183 @@ input:checked + label {
 }
 /*El color blue color nos ayuda a conseguir el color de manera mas facil.
   tambien para encontrar los tipos de fuente son en google fonts*/
+=======
+
+@import url('https://fonts.googleapis.com/css2?family=Inconsolata:wght@200..900&display=swap');
+
+body{
+    font-family: "Inconsolata", monospace;
+    font-optical-sizing: auto;
+    font-weight: weight;
+    font-style: normal;
+    font-variation-settings:
+        "wdth" 100;
+    background-color: #041562;
+}
+
+
+
+#seleccion-mascota {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+}
+
+.titulo {  /*. es para las clases de tipo id y el # es para los id  */
+    color: white;
+    font-size: 70px;
+
+
+}
+
+.subtitulos{
+    color: white;
+    font-size: 26px;
+
+
+}
+
+.tarjetas, .tarjetas-ataques{  /*Esto nos ayuda a que podamos hacer en lados iguales los cuadros.*/
+    display: flex;
+    gap: 10px;
+}
+.tarjeta-de-mokepon{    /*Son clases importante para dar algun cuadro cierta medida */
+    width: 182px;
+    height: 100px;
+    background-color: white;
+    padding: 10px;
+    box-sizing: border-box;
+    border-radius: 20px;
+    display: flex;
+    color: black;
+    align-items: center;
+    align-content: center;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.tarjeta-de-mokepon img{
+    width: 50px;
+}
+
+#boton-mascotas{
+    width: 180px;
+    height: 50px;
+    border-radius: 20px;
+    border: 2px black;
+    font-family: "Inconsolata", monospace;
+    margin-top: 30px;
+
+
+}
+
+
+input{     /*Aqui tambien se usa pero se tiene que poner el none para que el margin tenga el margin*/
+    display: none;
+}
+
+input:checked + label { 
+    background-color: cornflowerblue;
+    width: 200px;
+
+}
+
+
+#seleccion-ataque{
+    flex-direction: column;
+    align-items: center;
+}
+
+.boton-de-ataque{
+    background-color: white;
+    padding: 10px;
+    box-sizing: border-box;
+    border-radius: 20px;
+    border-color: transparent;
+    width: 70px;
+    font-family: "Inconsolata", monospace;
+
+}
+
+#mensajes{
+    width: 280px;
+    background: pink;
+    padding: 20px;
+    margin-top: 20px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+
+}
+
+
+#boton-reinicio {
+    border: none;
+    background-color: transparent;
+    color: blue;
+    font-family: "Inconsolata", monospace;
+}
+
+.ataques{
+    display: grid;
+    grid-template-columns: 100px 100px;
+}
+
+#vidas-jugador, #vidas-enemigo{
+    font-size: 32px;
+    margin-bottom: 0;
+}
+
+.ataques-jugador, .ataques-enemigo{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: white;
+
+}
+
+#ver-mapa{
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+
+#ver-mapa button{
+    width: 80px;
+    height: 50px;
+    border-radius: 20px;
+    border: 2px black;
+    font-family: "Inconsolata", monospace;
+    margin: 10px 0;
+
+
+}
+
+
+
+@media (max-width: 560px) {
+    .tarjetas{
+        flex-direction: column;
+    }
+
+    .tarjetas-ataques{
+        flex-direction: column;
+    }
+}
+
+
+@media (max-width: 300px) {
+    #ver-mapa div{
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+    }
+
+}
+/*El color blue color nos ayuda a conseguir el color de manera mas facil.
+  tambien para encontrar los tipos de fuente son en google fonts*/
+>>>>>>> ed3d8930e477f248a878f4385a2f6a1836de3dfa
