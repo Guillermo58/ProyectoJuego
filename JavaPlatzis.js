@@ -22,7 +22,10 @@ const contenedorAtaques = document.getElementById('contenedorAtaques')
 const sectionVerMapa = document.getElementById('ver-mapa')
 const mapa = document.getElementById('mapa')
 
+let jugadorId = null
+let enemigoId = null
 let mokepones = []
+let mokeponesEnemigo = []
 let ataqueEnemigo = []
 let opcionDeMokepones
 let inputCindrome
@@ -47,14 +50,20 @@ let lienzo = mapa.getContext("2d")
 let intervalo
 let mapaBackground = new Image()
 mapaBackground.src = './imagen/mokemap.png'
-let alturaQueBusacamos
-let anchoDelMapa = window.innerWidth - 20
-const anchoMaximoDelMapa = 350
+//let alturaQueBusacamos
+// let anchoDelMapa = window.innerWidth - 20
+// const anchoMaximoDelMapa = 350
 
-if(anchoDelMapa > anchoMaximoDelMapa){
-    anchoDelMapa = anchoMaximoDelMapa - 20
+// if(anchoDelMapa > anchoMaximoDelMapa){
+//     anchoDelMapa = anchoMaximoDelMapa - 20
 
-}
+// }
+let anchoDelMapa = Math.min(window.innerWidth - 40, 800)
+let alturaQueBusacamos = anchoDelMapa * 600 / 800
+
+mapa.width = anchoDelMapa
+mapa.height = alturaQueBusacamos
+
 
 alturaQueBusacamos = anchoDelMapa * 600 / 800
 
@@ -62,7 +71,8 @@ mapa.width = anchoDelMapa
 mapa.height = alturaQueBusacamos
 
 class Mokepon{
-    constructor(nombre, foto, vida, fotoMapa  ){
+    constructor(nombre, foto, vida, fotoMapa, id = null ){
+        this.id = id
         this.nombre = nombre 
         this.foto = foto
         this.vida = vida
@@ -94,59 +104,45 @@ class Mokepon{
 let cindrome = new Mokepon('Cindrome', './imagen/png-clipart-the-incredibles-buddy-pine-illustration-syndrome-comics-and-fantasy-the-incredibles-thumbnail.png', 5, './imagen/png-clipart-the-incredibles-buddy-pine-illustration-syndrome-comics-and-fantasy-the-incredibles-thumbnail.png')
 let increible = new Mokepon('Increible', './imagen/png-transparent-mr-incredibles-mr-incredible-youtube-elastigirl-frozone-dash-the-incredibles-superhero-fictional-character-pixar.png', 5 )
 let caladera = new Mokepon('Caladera', './imagen/3135414-middle.png', 5 )
-let cindromeEnemigo = new Mokepon('Cindrome', './imagen/png-clipart-the-incredibles-buddy-pine-illustration-syndrome-comics-and-fantasy-the-incredibles-thumbnail.png', 5)
-let increibleEnemigo = new Mokepon('Increible', './imagen/png-transparent-mr-incredibles-mr-incredible-youtube-elastigirl-frozone-dash-the-incredibles-superhero-fictional-character-pixar.png', 5)
-let caladeraEnemigo = new Mokepon('Caladera', './imagen/3135414-middle.png', 5)
+// let cindromeEnemigo = new Mokepon('Cindrome', './imagen/png-clipart-the-incredibles-buddy-pine-illustration-syndrome-comics-and-fantasy-the-incredibles-thumbnail.png', 5)
+// let increibleEnemigo = new Mokepon('Increible', './imagen/png-transparent-mr-incredibles-mr-incredible-youtube-elastigirl-frozone-dash-the-incredibles-superhero-fictional-character-pixar.png', 5)
+// let caladeraEnemigo = new Mokepon('Caladera', './imagen/3135414-middle.png', 5)
 
-cindrome.ataque.push(
+const Cindrome_Ataque = [
     { nombre: '⚡',  id: 'boton-rayo'},
     { nombre: '⚡',  id: 'boton-rayo'},
     { nombre: '⚡',  id: 'boton-rayo'},
     { nombre: '🔥',  id: 'boton-fuego'},
     { nombre: '❄️',  id: 'boton-nieve'},
-)
+]
+cindrome.ataque.push(...Cindrome_Ataque)
 
-cindromeEnemigo.ataque.push(
-    { nombre: '⚡',  id: 'boton-rayo'},
-    { nombre: '⚡',  id: 'boton-rayo'},
-    { nombre: '⚡',  id: 'boton-rayo'},
-    { nombre: '🔥',  id: 'boton-fuego'},
-    { nombre: '❄️',  id: 'boton-nieve'},
-)
+// cindromeEnemigo.ataque.push(...Cindrome_Ataque)
 
-
-increible.ataque.push(
+const Increible_Ataque = [
     { nombre: '🔥',  id: 'boton-fuego'},
     { nombre: '🔥',  id: 'boton-fuego'},
     { nombre: '🔥',  id: 'boton-fuego'},
     { nombre: '⚡',  id: 'boton-rayo'},
     { nombre: '❄️',  id: 'boton-nieve'},
-)
+]
 
+increible.ataque.push(...Increible_Ataque)
 
-increibleEnemigo.ataque.push(
-    { nombre: '🔥',  id: 'boton-fuego'},
-    { nombre: '🔥',  id: 'boton-fuego'},
-    { nombre: '🔥',  id: 'boton-fuego'},
-    { nombre: '⚡',  id: 'boton-rayo'},
-    { nombre: '❄️',  id: 'boton-nieve'},
-)
+// increibleEnemigo.ataque.push(...Increible_Ataque)
 
-caladera.ataque.push(
+const Caladera_Ataque = [
     { nombre: '❄️',  id: 'boton-nieve'},
     { nombre: '❄️',  id: 'boton-nieve'},
     { nombre: '❄️',  id: 'boton-nieve'},
     { nombre: '⚡',  id: 'boton-rayo'},
     { nombre: '🔥',  id: 'boton-fuego'},
-)
+]
 
-caladeraEnemigo.ataque.push(
-    { nombre: '❄️',  id: 'boton-nieve'},
-    { nombre: '❄️',  id: 'boton-nieve'},
-    { nombre: '❄️',  id: 'boton-nieve'},
-    { nombre: '⚡',  id: 'boton-rayo'},
-    { nombre: '🔥',  id: 'boton-fuego'},
-)
+caladera.ataque.push(...Caladera_Ataque)
+
+// caladeraEnemigo.ataque.push(...Caladera_Ataque)
+
 
 mokepones.push(cindrome,increible,caladera)
 
@@ -179,7 +175,13 @@ function iniciarjuego() {
 function unirseAljuego(){
     fetch("http://localhost:8080/unirse")
         .then(function (res) {
-            console.log(res)
+            if(res.ok){
+                res.text()
+                    .then(function(respuesta) {
+                        console.log(respuesta)
+                        jugadorId = respuesta
+                    })
+            }
         })
 }
 
@@ -207,12 +209,28 @@ function seleccionarMascota(){
     return
    }
 
+   seleccionarMokepon(mascotaJugador)
+
     extraerAtaques(mascotaJugador)
     sectionVerMapa.style.display = 'flex'
     iniciarMapa()
 
     
 }
+
+function seleccionarMokepon(mascotaJugador){
+    fetch(`http://localhost:8080/JavaPlatzis/${jugadorId}`,{
+        method: "post",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            mokepon: mascotaJugador
+        })
+})
+
+}
+
 
 function extraerAtaques(mascotaJugador){
     let ataque 
@@ -266,11 +284,46 @@ function secuenciaAtaque(){
             // boton.style.cursor = "not-allowed"
 
             ataqueAleatorioEnemigo()
+
+
+            if(ataquejugador.length === 5){
+                enviarAtaque()
+            }
         })
     }) 
     
 }
 
+
+function enviarAtaque(){
+    fetch(`http://localhost:8080//JavaPlatzis/${jugadorId}/ataques`,{
+        method: "post",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            ataques:ataquejugador
+        })
+    })
+
+    intervalo = setInterval(obtenerAtaques, 50)
+}
+
+function obtenerAtaques(){
+    fetch(`http://localhost:8080//JavaPlatzis/${enemigoId}/ataques`)
+        .then(function (res){
+            if (res.ok){
+                res.json()
+                    .then(function ({ ataques }) {
+                        if (ataques.length === 5){
+                            ataqueEnemigo = ataques
+                            combate()
+                        }
+
+                    })
+            }
+        })
+}
 
 
 function seleccionarMascotaEnemigo(){
@@ -312,6 +365,9 @@ function indexAmbosOponentes(jugador, enemigo){
 }
 
 function combate(){
+    clearInterval(intervalo)
+
+
     for(let index = 0; index < ataquejugador.length; index++){
         if(ataquejugador[index] === ataqueEnemigo[index]){
             indexAmbosOponentes(index, index)
@@ -409,17 +465,114 @@ function pintarCanvas(){  //ctrl + f para buscar atajo mas rapido'
 
     )
     mascotaJugadorObjeto.pintarMokepon()
-    increibleEnemigo.pintarMokepon()
-    cindromeEnemigo.pintarMokepon()
-    caladeraEnemigo.pintarMokepon()
+
+
+    mokeponesEnemigo.forEach(mokepon => {
+        mokepon.pintarMokepon()
+    })
+
+    // Enviar posición después de pintar
+    enviarPosicion(mascotaJugadorObjeto.x, mascotaJugadorObjeto.y)
+
     if (mascotaJugadorObjeto.velocidadX !== 0 || mascotaJugadorObjeto.velocidadY !== 0) {
-        revisarColision(cindromeEnemigo)
-        revisarColision(increibleEnemigo)
-        revisarColision(caladeraEnemigo)
-        
+        mokeponesEnemigo.forEach(enemigo => revisarColision(enemigo))
     }
+    // mascotaJugadorObjeto.pintarMokepon()
+
+    // enviarPosicion(mascotaJugadorObjeto.x, mascotaJugadorObjeto.y)
+
+
+    // mokeponesEnemigo.forEach(function (mokepon){
+    //     mokepon.pintarMokepon()
+    // })
+    // if (mascotaJugadorObjeto.velocidadX !== 0 || mascotaJugadorObjeto.velocidadY !== 0) {
+    //     revisarColision(cindromeEnemigo)
+    //     revisarColision(increibleEnemigo)
+    //     revisarColision(caladeraEnemigo)
+        
+    // }
     
 }
+
+// function enviarPosicion(x, y){
+//     fetch(`http://localhost:8080/JavaPlatzis/${jugadorId}/posicion`, {
+//         method:"post",
+//         headers: {
+//             "Content-Type": "application/json"
+//         },
+//         body: JSON.stringify({
+//             x,
+//             y
+//         })
+//     })
+//     .then(function (res){
+//         if (res.ok){
+//             res.json()
+//                 .then(function({enemigos}){
+//                     console.log(enemigos)
+//                     mokeponEnemigos = enemigos.map(function(enemigo){
+//                         let mokeponEnemigo = null
+//                         const mokeponNombre = enemigo.mokepon?.nombre || ""
+//                         if (mokeponNombre === "Cindrome"){
+//                             mokeponEnemigo = new Mokepon('Cindrome', './imagen/png-clipart-the-incredibles-buddy-pine-illustration-syndrome-comics-and-fantasy-the-incredibles-thumbnail.png', 5)
+//                         }else if(mokeponNombre === "Increible"){
+//                             mokeponEnemigo = new Mokepon('Increible', './imagen/png-transparent-mr-incredibles-mr-incredible-youtube-elastigirl-frozone-dash-the-incredibles-superhero-fictional-character-pixar.png', 5)
+//                         }else if(mokeponNombre === "Caladera"){
+//                             mokeponEnemigo = new Mokepon('Caladera', './imagen/3135414-middle.png', 5)
+//                         }
+
+
+//                         mokeponEnemigo.x = enemigo.x
+//                         mokeponEnemigo.y = enemigo.y
+
+//                         return mokeponEnemigos
+                        
+//                     })                    
+//                 })
+//         }
+
+//     })
+
+// }
+
+function enviarPosicion(x, y){
+    fetch(`http://localhost:8080/JavaPlatzis/${jugadorId}/posicion`, {
+        method:"post",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ x, y })
+    })
+    .then(res => res.json())
+    .then(({ enemigos }) => {
+        if (!enemigos || !Array.isArray(enemigos)) {
+            mokeponesEnemigo = []
+            return
+        }
+
+        // ✅ Guardamos los enemigos en el array global
+        mokeponesEnemigo = enemigos.map(enemigo => {
+            let mokeponEnemigo = null
+            const mokeponNombre = enemigo.mokepon?.nombre || ""
+
+            if (mokeponNombre === "Cindrome"){
+                mokeponEnemigo = new Mokepon("Cindrome", "./imagen/png-clipart-the-incredibles-buddy-pine-illustration-syndrome-comics-and-fantasy-the-incredibles-thumbnail.png", 5, enemigo.id)
+            } else if(mokeponNombre === "Increible"){
+                mokeponEnemigo = new Mokepon("Increible", "./imagen/png-transparent-mr-incredibles-mr-incredible-youtube-elastigirl-frozone-dash-the-incredibles-superhero-fictional-character-pixar.png", 5, enemigo.id)
+            } else if(mokeponNombre === "Caladera"){
+                mokeponEnemigo = new Mokepon("Caladera", "./imagen/3135414-middle.png", 5, enemigo.id)
+            }
+
+            if(mokeponEnemigo){
+                mokeponEnemigo.x = enemigo.x
+                mokeponEnemigo.y = enemigo.y
+            }
+            return mokeponEnemigo
+        }).filter(Boolean) // ✅ Elimina los null
+    })
+    .catch(err => {
+        console.error("❌ Error al procesar enemigos:", err)
+    })
+}
+
 
 function moverDerecha(){
     mascotaJugadorObjeto.velocidadX = 5
@@ -505,6 +658,7 @@ function revisarColision(enemigo){
     detenerMovimiento()
     clearInterval(intervalo)
     console.log('Se detencto una colision')
+    enemigoId = enemigo.id
     sectionSeleccionarAtaque.style.display = 'flex'
     sectionVerMapa.style.display = 'none'
     seleccionarMascotaEnemigo(enemigo)
