@@ -23,7 +23,6 @@ const sectionVerMapa = document.getElementById('ver-mapa')
 const mapa = document.getElementById('mapa')
 
 let jugadorId = null
-let enemigoId = null
 let mokepones = []
 let mokeponesEnemigo = []
 let ataqueEnemigo = []
@@ -284,46 +283,11 @@ function secuenciaAtaque(){
             // boton.style.cursor = "not-allowed"
 
             ataqueAleatorioEnemigo()
-
-
-            if(ataquejugador.length === 5){
-                enviarAtaque()
-            }
         })
     }) 
     
 }
 
-
-function enviarAtaque(){
-    fetch(`http://localhost:8080//JavaPlatzis/${jugadorId}/ataques`,{
-        method: "post",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            ataques:ataquejugador
-        })
-    })
-
-    intervalo = setInterval(obtenerAtaques, 50)
-}
-
-function obtenerAtaques(){
-    fetch(`http://localhost:8080//JavaPlatzis/${enemigoId}/ataques`)
-        .then(function (res){
-            if (res.ok){
-                res.json()
-                    .then(function ({ ataques }) {
-                        if (ataques.length === 5){
-                            ataqueEnemigo = ataques
-                            combate()
-                        }
-
-                    })
-            }
-        })
-}
 
 
 function seleccionarMascotaEnemigo(){
@@ -365,9 +329,6 @@ function indexAmbosOponentes(jugador, enemigo){
 }
 
 function combate(){
-    clearInterval(intervalo)
-
-
     for(let index = 0; index < ataquejugador.length; index++){
         if(ataquejugador[index] === ataqueEnemigo[index]){
             indexAmbosOponentes(index, index)
@@ -464,76 +425,21 @@ function pintarCanvas(){  //ctrl + f para buscar atajo mas rapido'
         mapa.height
 
     )
-    mascotaJugadorObjeto.pintarMokepon()
+   mascotaJugadorObjeto.pintarMokepon()
 
-
+  
     mokeponesEnemigo.forEach(mokepon => {
         mokepon.pintarMokepon()
     })
 
-    // Enviar posición después de pintar
+    
     enviarPosicion(mascotaJugadorObjeto.x, mascotaJugadorObjeto.y)
 
     if (mascotaJugadorObjeto.velocidadX !== 0 || mascotaJugadorObjeto.velocidadY !== 0) {
         mokeponesEnemigo.forEach(enemigo => revisarColision(enemigo))
     }
-    // mascotaJugadorObjeto.pintarMokepon()
-
-    // enviarPosicion(mascotaJugadorObjeto.x, mascotaJugadorObjeto.y)
-
-
-    // mokeponesEnemigo.forEach(function (mokepon){
-    //     mokepon.pintarMokepon()
-    // })
-    // if (mascotaJugadorObjeto.velocidadX !== 0 || mascotaJugadorObjeto.velocidadY !== 0) {
-    //     revisarColision(cindromeEnemigo)
-    //     revisarColision(increibleEnemigo)
-    //     revisarColision(caladeraEnemigo)
-        
-    // }
     
 }
-
-// function enviarPosicion(x, y){
-//     fetch(`http://localhost:8080/JavaPlatzis/${jugadorId}/posicion`, {
-//         method:"post",
-//         headers: {
-//             "Content-Type": "application/json"
-//         },
-//         body: JSON.stringify({
-//             x,
-//             y
-//         })
-//     })
-//     .then(function (res){
-//         if (res.ok){
-//             res.json()
-//                 .then(function({enemigos}){
-//                     console.log(enemigos)
-//                     mokeponEnemigos = enemigos.map(function(enemigo){
-//                         let mokeponEnemigo = null
-//                         const mokeponNombre = enemigo.mokepon?.nombre || ""
-//                         if (mokeponNombre === "Cindrome"){
-//                             mokeponEnemigo = new Mokepon('Cindrome', './imagen/png-clipart-the-incredibles-buddy-pine-illustration-syndrome-comics-and-fantasy-the-incredibles-thumbnail.png', 5)
-//                         }else if(mokeponNombre === "Increible"){
-//                             mokeponEnemigo = new Mokepon('Increible', './imagen/png-transparent-mr-incredibles-mr-incredible-youtube-elastigirl-frozone-dash-the-incredibles-superhero-fictional-character-pixar.png', 5)
-//                         }else if(mokeponNombre === "Caladera"){
-//                             mokeponEnemigo = new Mokepon('Caladera', './imagen/3135414-middle.png', 5)
-//                         }
-
-
-//                         mokeponEnemigo.x = enemigo.x
-//                         mokeponEnemigo.y = enemigo.y
-
-//                         return mokeponEnemigos
-                        
-//                     })                    
-//                 })
-//         }
-
-//     })
-
-// }
 
 function enviarPosicion(x, y){
     fetch(`http://localhost:8080/JavaPlatzis/${jugadorId}/posicion`, {
@@ -548,17 +454,17 @@ function enviarPosicion(x, y){
             return
         }
 
-        // ✅ Guardamos los enemigos en el array global
+        //  Guardamos los enemigos en el array global
         mokeponesEnemigo = enemigos.map(enemigo => {
             let mokeponEnemigo = null
             const mokeponNombre = enemigo.mokepon?.nombre || ""
 
             if (mokeponNombre === "Cindrome"){
-                mokeponEnemigo = new Mokepon("Cindrome", "./imagen/png-clipart-the-incredibles-buddy-pine-illustration-syndrome-comics-and-fantasy-the-incredibles-thumbnail.png", 5, enemigo.id)
+                mokeponEnemigo = new Mokepon("Cindrome", "./imagen/png-clipart-the-incredibles-buddy-pine-illustration-syndrome-comics-and-fantasy-the-incredibles-thumbnail.png", 5)
             } else if(mokeponNombre === "Increible"){
-                mokeponEnemigo = new Mokepon("Increible", "./imagen/png-transparent-mr-incredibles-mr-incredible-youtube-elastigirl-frozone-dash-the-incredibles-superhero-fictional-character-pixar.png", 5, enemigo.id)
+                mokeponEnemigo = new Mokepon("Increible", "./imagen/png-transparent-mr-incredibles-mr-incredible-youtube-elastigirl-frozone-dash-the-incredibles-superhero-fictional-character-pixar.png", 5)
             } else if(mokeponNombre === "Caladera"){
-                mokeponEnemigo = new Mokepon("Caladera", "./imagen/3135414-middle.png", 5, enemigo.id)
+                mokeponEnemigo = new Mokepon("Caladera", "./imagen/3135414-middle.png", 5)
             }
 
             if(mokeponEnemigo){
@@ -566,12 +472,13 @@ function enviarPosicion(x, y){
                 mokeponEnemigo.y = enemigo.y
             }
             return mokeponEnemigo
-        }).filter(Boolean) // ✅ Elimina los null
+        }).filter(Boolean) 
     })
     .catch(err => {
-        console.error("❌ Error al procesar enemigos:", err)
+        console.error(" Error al procesar enemigos:", err)
     })
 }
+
 
 
 function moverDerecha(){
@@ -658,7 +565,6 @@ function revisarColision(enemigo){
     detenerMovimiento()
     clearInterval(intervalo)
     console.log('Se detencto una colision')
-    enemigoId = enemigo.id
     sectionSeleccionarAtaque.style.display = 'flex'
     sectionVerMapa.style.display = 'none'
     seleccionarMascotaEnemigo(enemigo)
