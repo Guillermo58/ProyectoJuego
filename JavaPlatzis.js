@@ -1,5 +1,3 @@
-
-
 const sectionSelectAttack = document.getElementById('select-attack')
 const sectionRestart = document.getElementById('restart')
 const btnSelectPet = document.getElementById('button-select-pet')
