@@ -26,14 +26,13 @@ body {
     margin: 5px 0 20px 0;
 }
 
-.cards, .cards-attacks {  /* contenedores de tarjetas */
+.cards, .cards-attacks {  
     display: flex;
     gap: 10px;
     flex-wrap: wrap;
     justify-content: center;
 }
 
-/* ...existing code... */
 .mokepon-card {
     width: 220px;
     height: 220px;
@@ -74,7 +73,7 @@ body {
     background: #f3f3f3;
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
-/* ...existing code... */
+
 
 #button-select-pet, #button-restart {
     width: 180px;

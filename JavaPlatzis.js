@@ -1,4 +1,4 @@
-// Variables y funciones traducidas y estandarizadas a inglés y camelCase
+
 
 const sectionSelectAttack = document.getElementById('select-attack')
 const sectionRestart = document.getElementById('restart')
