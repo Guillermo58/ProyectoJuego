@@ -1,5 +1,4 @@
 const express = require("express")
-
 const cors = require("cors")
 
 const app = express()
@@ -7,73 +6,118 @@ const app = express()
 app.use(cors())
 app.use(express.json())
 
-const jugadores = []
+const players = []
 
-class Jugador{
-    constructor(id){
+class Player {
+    constructor(id) {
         this.id = id
+        this.inBattle = false
     }
 
-    asignarMokepon(mokepon){
+    assignMokepon(mokepon) {
         this.mokepon = mokepon
     }
-    actualizarPosicion(x,y){
+
+    updatePosition(x, y) {
         this.x = x
         this.y = y
     }
 }
 
-class Mokepon{
-    constructor(nombre){
-        this.nombre = nombre
+class Mokepon {
+    constructor(name) {
+        this.name = name
     }
 }
 
-app.get("/unirse", (req, res ) => {
+app.get("/join", (req, res) => {
     const id = `${Math.random()}`
 
-    const jugador = new Jugador(id)
-
-    jugadores.push(jugador)
+    const player = new Player(id)
+    players.push(player)
 
     res.setHeader("Access-Control-Allow-Origin", "*")
     res.send(id)
-
 })
 
-app.post("/JavaPlatzis/:jugadorId", (req, res) => {
-    const jugadorId = req.params.jugadorId || ""
-    const nombre = req.body.mokepon || ""
-    const mokepon = new Mokepon(nombre)
+app.post("/reset", (req, res) => {
+    players.length = 0
+    res.send("Players reset")
+})
 
-    const jugadorIndex = jugadores.findIndex((jugador) => jugadorId === jugador.id)
-    
-    if(jugadorIndex >= 0){
-        jugadores[jugadorIndex].asignarMokepon(mokepon)
+app.post("/JavaPlatzis/:playerId", (req, res) => {
+    const playerId = req.params.playerId || ""
+    const name = req.body.mokepon || ""
+    const mokepon = new Mokepon(name)
+
+    const playerIndex = players.findIndex((player) => playerId === player.id)
+
+    if (playerIndex >= 0) {
+        players[playerIndex].assignMokepon(mokepon)
     }
-    console.log(jugadores)
-    console.log(jugadorId)
+
+    console.log(players)
+    console.log(playerId)
     res.end()
 })
 
-
-app.post("/JavaPlatzis/:jugadorId/posicion", (req, res) =>{
-    const jugadorId = req.params.jugadorId
+app.post("/JavaPlatzis/:playerId/position", (req, res) => {
+    const playerId = req.params.playerId
     const { x, y } = req.body
 
-    const jugadorIndex = jugadores.findIndex(j => j.id === jugadorId)
-    if (jugadorIndex >= 0){
-        jugadores[jugadorIndex].x = x
-        jugadores[jugadorIndex].y = y
+    const playerIndex = players.findIndex((p) => p.id === playerId)
+    if (playerIndex >= 0) {
+        players[playerIndex].x = x
+        players[playerIndex].y = y
     }
 
-    // asegurarse de enviar siempre un array
-    const enemigos = jugadores.filter(j => j.id !== jugadorId)
+   
+    const enemies = players.filter((p) => p.id !== playerId)
 
-    res.json({ enemigos })   //  muy importante
+    res.json({ enemies })
+})
+
+// Ejemplo de endpoint robusto:
+app.post("/JavaPlatzis/:playerId/battle", (req, res) => {
+    const playerId = req.params.playerId
+    const enemyId = req.body.enemyId
+
+    const player = players.find(p => p.id === playerId)
+    const enemy = players.find(p => p.id === enemyId)
+
+    // Si ambos existen
+    if (player && enemy) {
+        // Si ambos ya están en batalla entre sí, permite la batalla (no es un tercer jugador)
+        if (
+            player.inBattle && enemy.inBattle &&
+            player.enemyId === enemy.id && enemy.enemyId === player.id
+        ) {
+            return res.json({ ok: true })
+        }
+
+        // Si alguno ya está en batalla con otro, rechaza
+        if (player.inBattle || enemy.inBattle) {
+            return res.json({ ok: false, message: "One or both players are already in battle" })
+        }
+
+        // Marca ambos como en batalla entre sí
+        player.inBattle = true
+        player.enemyId = enemy.id
+        enemy.inBattle = true
+        enemy.enemyId = player.id
+
+        return res.json({ ok: true })
+    }
+    res.json({ ok: false })
+})
+
+app.get("/JavaPlatzis/:playerId/battle", (req, res) => {
+    const playerId = req.params.playerId
+    const player = players.find(p => p.id === playerId)
+    res.json({ inBattle: !!(player && player.inBattle) })
 })
 
 
 app.listen(8080, () => {
-    console.log("Servidor Funcionando")
+    console.log("Server Running")
 })
