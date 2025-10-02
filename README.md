@@ -16,14 +16,17 @@ Asegúrate de tener instalado:
 
 ```bash
 git clone https://github.com/Guillermo58/ProyectoJuego.git
+```
 
-## Instalación de Dependencias
+## 2. Instalar Dependencias 
 ```bash
 npm install
+```
 
-## Iniciar Servidor
+## 3. Iniciar el Servidor
 ```bash
 node JavaPlatzi.js
+```
 
 
 
