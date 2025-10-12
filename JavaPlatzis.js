@@ -16,13 +16,14 @@ const sectionViewMap = document.getElementById('view-map')
 const map = document.getElementById('map')
 
 let playerId = null
+let enemyId = null
 let mokepons = []
 let enemyMokepons = []
 let enemyAttacks = []
 let petOptions
 let inputCindrome
 let inputIncredible
-let inputSkull
+let inputFrozono
 let playerPet
 let playerPetObject
 let mokeponAttacks
@@ -74,7 +75,7 @@ class Mokepon {
 
 let cindrome = new Mokepon('Cindrome', './imagen/png-clipart-the-incredibles-buddy-pine-illustration-syndrome-comics-and-fantasy-the-incredibles-thumbnail.png', 5, './imagen/png-clipart-the-incredibles-buddy-pine-illustration-syndrome-comics-and-fantasy-the-incredibles-thumbnail.png')
 let incredible = new Mokepon('Incredible', './imagen/png-transparent-mr-incredibles-mr-incredible-youtube-elastigirl-frozone-dash-the-incredibles-superhero-fictional-character-pixar.png', 5)
-let skull = new Mokepon('Skull', './imagen/3135414-middle.png', 5)
+let skull = new Mokepon('Frozono', './imagen/3135414-middle.png', 5)
 
 const cindromeAttacks = [
     { name: '⚡', id: 'btn-lightning' },
@@ -120,7 +121,7 @@ function startGame() {
     })
     inputCindrome = document.getElementById('Cindrome')
     inputIncredible = document.getElementById('Incredible')
-    inputSkull = document.getElementById('Skull')
+    inputFrozono = document.getElementById('Frozono')
 
     btnSelectPet.addEventListener('click', selectPet)
     btnRestart.addEventListener('click', restartGame)
@@ -134,7 +135,7 @@ function joinGame() {
             if (res.ok) {
                 res.text()
                     .then(function (response) {
-                        console.log(response)
+                        console.log(response)   
                         playerId = response
                     })
             }
@@ -143,19 +144,29 @@ function joinGame() {
 
 function selectPet() {
     sectionSelectPet.style.display = 'none'
+    let selected = false
+
     if (inputCindrome.checked) {
-        spanPlayerPet.innerHTML = inputCindrome.id
-        playerPet = inputCindrome.id
+        spanPlayerPet.innerHTML = "Cindrome"
+        playerPet = "Cindrome"
+        selected = true
     } else if (inputIncredible.checked) {
-        spanPlayerPet.innerHTML = inputIncredible.id
-        playerPet = inputIncredible.id
-    } else if (inputSkull.checked) {
-        spanPlayerPet.innerHTML = inputSkull.id
-        playerPet = inputSkull.id
-    } else {
-        alert("Select a Super Hero")
+        spanPlayerPet.innerHTML = "Incredible"
+        playerPet = "Incredible"
+        selected = true
+    } else if (inputFrozono.checked) {
+        spanPlayerPet.innerHTML = "Frozono"
+        playerPet = "Frozono"
+        selected = true
+    }
+
+    if (!selected) {
+        // Mostrar mensaje visual y NO continuar con el juego
+        sectionSelectPet.style.display = 'flex'
+        messagesSection.innerHTML = "Por favor selecciona una mascota antes de continuar."
         return
     }
+
     sendPetSelection(playerPet)
     extractAttacks(playerPet)
     sectionViewMap.style.display = 'flex'
@@ -182,58 +193,173 @@ function extractAttacks(pet) {
 }
 
 function showAttacks(attacks) {
-    attacks.forEach((attack) => {
-        mokeponAttacks = `<button id=${attack.id} class="attack-btn">${attack.name}</button>`
-        attacksContainer.innerHTML += mokeponAttacks
+    attacksContainer.innerHTML = ""
+    attacks.forEach((attack, idx) => {
+        // El valor del ataque se guarda en un atributo data-attack
+        const btn = document.createElement('button')
+        btn.id = `btn-attack-${idx}`
+        btn.className = 'attack-btn'
+        btn.textContent = attack.name
+        btn.setAttribute('data-attack', attack.id) // id representa el tipo de ataque
+        attacksContainer.appendChild(btn)
     })
-    btnLightning = document.getElementById('btn-lightning')
-    btnSnow = document.getElementById('btn-snow')
-    btnFire = document.getElementById('btn-fire')
     attackButtons = document.querySelectorAll('.attack-btn')
-    attackSequence()
+    improvedAttackSequence(attacks)
 }
 
-function attackSequence() {
-    // Limpia el contador y la lista visual al iniciar la batalla
+function improvedAttackSequence() {
     document.getElementById('attack-counter').textContent = "Ataques seleccionados: 0/5"
     document.getElementById('player-attacks-list').innerHTML = ""
+    messagesSection.innerHTML = "Tu turno para elegir ataque"; // Indicador de turno
 
     attackButtons.forEach((button, idx) => {
         button.addEventListener('click', (e) => {
-            let attackType
-            if (e.target.textContent === '🔥') {
-                attackType = 'FIRE'
-            } else if (e.target.textContent === '⚡') {
-                attackType = 'LIGHTNING'
-            } else {
-                attackType = 'SNOW'
-            }
-            playerAttacks.push(attackType)
+            if (playerAttacks.length >= 5 || playerWins >= 3 || enemyWins >= 3) return
+
+            let attackType = button.getAttribute('data-attack')
+            let emoji = button.textContent
+            let attackText = attackType === 'btn-fire' ? 'FIRE' :
+                             attackType === 'btn-lightning' ? 'LIGHTNING' :
+                             attackType === 'btn-snow' ? 'SNOW' : attackType
+
+            playerAttacks.push(attackText)
             button.style.background = '#112f58'
             button.disabled = true
 
-            // Feedback instantáneo: mostrar el ataque en la lista
+            fetch(`http://localhost:8080/JavaPlatzis/${playerId}/attack`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ attack: attackText })
+            })
+
+            // Mostrar ataque en lista del jugador
             const attackOrder = document.getElementById('player-attacks-list')
-            const attackSpan = document.createElement('span')
-            attackSpan.textContent = e.target.textContent
-            attackSpan.style.margin = '0 4px'
-            attackSpan.style.fontSize = '2rem'
-            attackOrder.appendChild(attackSpan)
+            const attackDiv = document.createElement('div')
+            attackDiv.style.display = 'flex'
+            attackDiv.style.alignItems = 'center'
+            attackDiv.style.marginBottom = '4px'
+            attackDiv.innerHTML = `<span style="font-size:2rem; margin-right:6px;">${emoji}</span><span>${attackText}</span>`
+            attackOrder.appendChild(attackDiv)
 
             // Actualizar contador
             const attackCounter = document.getElementById('attack-counter')
             attackCounter.textContent = `Ataques seleccionados: ${playerAttacks.length}/5`
 
-            enemyRandomAttack()
+            // Bloquear botones si termina la partida
+            if (playerAttacks.length >= 5 || playerWins >= 3 || enemyWins >= 3) {
+                attackButtons.forEach(btn => btn.disabled = true)
+            }
+
+            messagesSection.innerHTML = "Esperando al rival..."; 
+
+            checkRoundResult()
         })
+    })
+    pollEnemyAttacks()
+}
+
+function checkRoundResult() {
+    if (!enemyId) return
+    const round = playerAttacks.length - 1
+    fetch(`http://localhost:8080/JavaPlatzis/${enemyId}/attacks`)
+        .then(res => res.json())
+        .then(data => {
+            const enemyAttacksNow = data.attacks || []
+            if (enemyAttacksNow.length > round) {
+                const playerAttack = playerAttacks[round]
+                const enemyAttack = enemyAttacksNow[round]
+                let result = ""
+                let winnerName = spanEnemyPet.innerHTML || "Enemigo"
+                let emojiPlayer = playerAttack === 'FIRE' ? '🔥' : playerAttack === 'LIGHTNING' ? '⚡' : '❄️'
+                let emojiEnemy = enemyAttack === 'FIRE' ? '🔥' : enemyAttack === 'LIGHTNING' ? '⚡' : '❄️'
+
+                // Mostrar ataque enemigo en lista
+                const enemyOrder = document.getElementById('enemy-attacks-list')
+                const enemyDiv = document.createElement('div')
+                enemyDiv.style.display = 'flex'
+                enemyDiv.style.alignItems = 'center'
+                enemyDiv.style.marginBottom = '4px'
+                enemyDiv.innerHTML = `<span style="font-size:2rem; margin-right:6px;">${emojiEnemy}</span><span>${enemyAttack}</span>`
+                enemyOrder.appendChild(enemyDiv)
+
+                // Lógica de combate
+                if (playerAttack === enemyAttack) {
+                    result = `Ronda ${round + 1}: EMPATE<br>Tu ataque: ${emojiPlayer} ${playerAttack} - ${winnerName}: ${emojiEnemy} ${enemyAttack}`
+                } else if (
+                    (playerAttack == 'FIRE' && enemyAttack == 'SNOW') ||
+                    (playerAttack == 'LIGHTNING' && enemyAttack == 'FIRE') ||
+                    (playerAttack == 'SNOW' && enemyAttack == 'LIGHTNING')
+                ) {
+                    result = `Ronda ${round + 1}: GANASTE<br>Tu ataque: ${emojiPlayer} ${playerAttack} - ${winnerName}: ${emojiEnemy} ${enemyAttack}`
+                    playerWins++
+                    spanPlayerLives.innerHTML = playerWins
+                } else {
+                    result = `Ronda ${round + 1}: PERDISTE<br>Tu ataque: ${emojiPlayer} ${playerAttack} - ${winnerName}: ${emojiEnemy} ${enemyAttack}<br>
+                    ${winnerName} te derrotó usando ${emojiEnemy} ${enemyAttack}`
+                    enemyWins++
+                    spanEnemyLives.innerHTML = enemyWins
+                }
+                messagesSection.innerHTML = result // Mensaje de resultado de la ronda
+
+                // Terminar partida si alguien llega a 3 victorias o se completan los 5 ataques
+                if (playerWins >= 3 || enemyWins >= 3 || playerAttacks.length >= 5) {
+                    setTimeout(() => {
+                        checkLives()
+                        attackButtons.forEach(btn => btn.disabled = true)
+                    }, 1200)
+                }
+            } else {
+                // Si el enemigo aún no ha atacado, vuelve a consultar en 500ms
+                setTimeout(checkRoundResult, 500)
+            }
+        })
+}
+
+function showAttackSummary(attacks, containerId) {
+    const container = document.getElementById(containerId)
+    container.innerHTML = "" 
+    attacks.slice(0, 5).forEach(attack => {
+        let emoji = attack === 'FIRE' ? '🔥' : attack === 'LIGHTNING' ? '⚡' : '❄️'
+        const attackDiv = document.createElement('div')
+        attackDiv.style.display = 'flex'
+        attackDiv.style.alignItems = 'center'
+        attackDiv.style.marginBottom = '4px'
+        attackDiv.innerHTML = `<span style="font-size:2rem; margin-right:6px;">${emoji}</span><span>${attack}</span>`
+        container.appendChild(attackDiv)
     })
 }
 
-function selectEnemyPet() {
-    let randomPetIndex = random(0, mokepons.length - 1)
-    spanEnemyPet.innerHTML = mokepons[randomPetIndex].name
-    enemyMokeponAttacks = mokepons[randomPetIndex].attacks
-    attackSequence()
+function pollEnemyAttacks() {
+    // teniendo los id enemigos 
+    let lastCount = 0
+    setInterval(() => {
+        if (!enemyId) return
+        fetch(`http://localhost:8080/JavaPlatzis/${enemyId}/attacks`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.attacks && data.attacks.length > lastCount) {
+                    const newAttacks = data.attacks.slice(lastCount)
+                    const enemyAttackOrder = document.getElementById('enemy-attacks-list')
+                    newAttacks.forEach(attack => {
+                        let emoji = attack === 'FIRE' ? '🔥' : attack === 'LIGHTNING' ? '⚡' : '❄️'
+                        const attackDiv = document.createElement('div')
+                        attackDiv.style.display = 'flex'
+                        attackDiv.style.alignItems = 'center'
+                        attackDiv.style.marginBottom = '4px'
+                        attackDiv.innerHTML = `<span style="font-size:2rem; margin-right:6px;">${emoji}</span><span>${attack}</span>`
+                        enemyAttackOrder.appendChild(attackDiv)
+                    })
+                    lastCount = data.attacks.length
+                }
+            })
+    }, 700)
+}
+
+
+function selectEnemyPet(enemy) {
+    spanEnemyPet.innerHTML = enemy.name
+    enemyMokeponAttacks = enemy.attacks
+    improvedAttackSequence(enemyMokeponAttacks) 
 }
 
 function enemyRandomAttack() {
@@ -279,17 +405,29 @@ function fight() {
             enemyWins++
             spanEnemyLives.innerHTML = enemyWins
         }
+        if (playerWins >= 5 || enemyWins >= 5) {
+            break
+        }
     }
-    checkLives()
+    //checkLives()
 }
 
 function checkLives() {
+    let winnerName = spanEnemyPet.innerHTML || "Enemigo"
     if (playerWins === enemyWins) {
-        finalMessage("It's a DRAW!!")
-    } else if (playerWins > enemyLives) {
-        finalMessage("CONGRATS, YOU WON!")
-    } else {
-        finalMessage("Sorry, you lost.")
+        finalMessage(`¡Empate! Ambos tienen ${playerWins} victorias.`)
+    } else if (playerWins >= 3) {
+        finalMessage(`¡Felicidades, ganaste la partida!`)
+    } else if (enemyWins >= 3) {
+        finalMessage(`Perdiste la partida.<br>${winnerName} te derrotó con ${enemyWins} victorias.`)
+    } else if (playerAttacks.length >= 5) {
+        if (playerWins > enemyWins) {
+            finalMessage(`¡Felicidades, ganaste la partida!`)
+        } else if (playerWins < enemyWins) {
+            finalMessage(`Perdiste la partida.<br>${winnerName} te derrotó con ${enemyWins} victorias.`)
+        } else {
+            finalMessage(`¡Empate! Ambos tienen ${playerWins} victorias.`)
+        }
     }
 }
 
@@ -305,15 +443,41 @@ function createMessage(result) {
     enemyAttackLog.appendChild(newEnemyAttack)
 }
 
-function finalMessage(finalResult) {
-    messagesSection.innerHTML = finalResult
+function finalMessage() {
+    let winnerName = spanEnemyPet.innerHTML || "Enemigo"
+    let playerName = spanPlayerPet.innerHTML || "Jugador"
+    let message = ""
+
+    if (playerWins > enemyWins) {
+        message = `¡${playerName} ganó la partida con ${playerWins} victorias!<br>${winnerName} perdió con ${enemyWins} victorias.`
+    } else if (playerWins < enemyWins) {
+        message = `Perdiste la partida.<br>${winnerName} te derrotó con ${enemyWins} victorias.`
+    } else {
+        message = `¡Empate! Ambos tienen ${playerWins} victorias.`
+    }
+
+    messagesSection.innerHTML = `
+        <div style="text-align:center;">
+            <strong>${message}</strong>
+            <br>
+            <span>Ataques seleccionados: ${playerAttacks.length}/5</span>
+        </div>
+    `
     sectionRestart.style.display = 'block'
     clearInterval(interval)
     canvas.clearRect(0, 0, map.width, map.height)
     enemyMokepons = []
     playerPetObject = null
-    inBattle = false // Permite nuevas batallas después de reiniciar
+    inBattle = false
+
+    showAttackSummary(playerAttacks, 'player-attacks-list')
+    showAttackSummary(enemyAttacks, 'enemy-attacks-list')
+
+    //Actualiza las vidas a 0 para evitar confusión
+    spanPlayerLives.innerHTML = "0"
+    spanEnemyLives.innerHTML = "0"
 }
+
 
 function restartGame() {
     fetch("http://localhost:8080/reset", { method: "POST" })
@@ -386,14 +550,15 @@ function sendPosition(x, y) {
                 enemyMokepon = new Mokepon("Cindrome","./imagen/png-clipart-jack-jack-parr-edna-marie-e-mode-violet-parr-villain-edna-y-jack-jack-superhero-villain-thumbnail.png",5, undefined, enemy.id)
             } else if (mokeponName === "Incredible") {
                 enemyMokepon = new Mokepon("Incredible", "./imagen/5d77bacee82a23495a218c565bbf873c.jpg", 5, undefined, enemy.id)
-            } else if (mokeponName === "Skull") {
-                enemyMokepon = new Mokepon("Skull", "./imagen/images.jpg", 5, undefined, enemy.id)
+            } else if (mokeponName === "Frozono") {
+                enemyMokepon = new Mokepon("Frozono", "./imagen/images.jpg", 5, undefined, enemy.id)
             }
 
             if (enemyMokepon) {
                 enemyMokepon.x = enemy.x
                 enemyMokepon.y = enemy.y
-                enemyMokepon.id = enemy.id 
+                enemyMokepon.id = enemy.id
+                enemyMokepon.name = enemy.mokepon?.name || "" 
             }
             return enemyMokepon
         }).filter(Boolean)
@@ -459,6 +624,7 @@ function checkCollision(enemy) {
     inBattle = true // Marca que ya estoy en batalla
     stopMovement()
     clearInterval(interval)
+    enemyId = enemy.id
     fetch(`http://localhost:8080/JavaPlatzis/${playerId}/battle`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -471,7 +637,7 @@ function checkCollision(enemy) {
             sectionViewMap.style.display = 'none'
             selectEnemyPet(enemy)
         } else {
-            messagesSection.innerHTML = "¡Este jugador ya está en batalla! Espera a que termine para poder pelear.";
+            messagesSection.innerHTML = "¡This player is battle! Wait the player finish the battle.";
             setTimeout(() => {
                 messagesSection.innerHTML = ""
                 inBattle = false // Permite volver a intentar después del mensaje

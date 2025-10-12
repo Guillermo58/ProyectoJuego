@@ -26,7 +26,7 @@ body {
     margin: 5px 0 20px 0;
 }
 
-.cards, .cards-attacks {  
+.cards, .cards-attacks {  /* contenedores de tarjetas */
     display: flex;
     gap: 10px;
     flex-wrap: wrap;
